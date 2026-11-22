@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from fractions import Fraction
 
-from grafico import analizar_region
+from grafico import _cruces, _cumple, analizar_region
 from gran_m import Problema, cargar_preset, resolver, texto_valor
 
 
@@ -22,12 +22,19 @@ def revisar(nombre, esperados, z, estado="optimo"):
     if z is not None:
         assert casi(res.z, z), (nombre, texto_valor(res.z), z)
     for var, esperado in esperados.items():
-        assert casi(res.valores[var], esperado), (nombre, var, texto_valor(res.valores[var]), esperado)
+        assert casi(res.valores[var], esperado), (
+            nombre,
+            var,
+            texto_valor(res.valores[var]),
+            esperado,
+        )
     print(f"\n== {nombre}: {res.mensaje}")
     for paso in res.pasos:
         movimiento = ""
         if paso.entra and paso.sale:
-            movimiento = f" | entra {paso.entra}, sale {paso.sale}, pivote {paso.pivote}"
+            movimiento = (
+                f" | entra {paso.entra}, sale {paso.sale}, pivote {paso.pivote}"
+            )
         elif paso.entra and not paso.sale:
             movimiento = f" | entra {paso.entra}, nadie sale"
         print(f"  {paso.titulo}{movimiento}")
@@ -58,7 +65,18 @@ def test_todos():
     region2 = analizar_region(cargar_preset("Problema 2").restricciones)
     assert region2["acotada"]
     assert len(region2["vertices"]) == 2, region2["vertices"]
-    print("\nGráfico: problema 1 tiene los 4 vértices. Problema 5 no está acotado. Problema 2 es un segmento.")
+
+    wyndor = [
+        ([float(c) for c in coefs], rel, float(b))
+        for coefs, rel, b in cargar_preset("Wyndor").restricciones
+    ]
+    cruces = {(round(x, 4), round(y, 4)) for x, y in _cruces(wyndor)}
+    assert {(4, 6), (6, 0), (0, 9)} <= cruces
+    for x, y in ((4, 6), (6, 0), (0, 9)):
+        assert not _cumple(x, y, wyndor)
+    print(
+        "\nGráfico: problema 1 tiene los 4 vértices. Problema 5 no está acotado. Problema 2 es un segmento."
+    )
 
 
 def _con_cambio(problema, i_b=None, delta_b=0, i_c=None, delta_c=0):
@@ -66,7 +84,9 @@ def _con_cambio(problema, i_b=None, delta_b=0, i_c=None, delta_c=0):
         (coefs, rel, b + (delta_b if k == i_b else 0))
         for k, (coefs, rel, b) in enumerate(problema.restricciones)
     ]
-    coeficientes = [coef + (delta_c if k == i_c else 0) for k, coef in enumerate(problema.c)]
+    coeficientes = [
+        coef + (delta_c if k == i_c else 0) for k, coef in enumerate(problema.c)
+    ]
     return Problema(problema.sentido, coeficientes, restricciones)
 
 
@@ -103,26 +123,45 @@ def test_sensibilidad():
         base = resolver(problema)
         assert base.sensibilidad is not None, nombre
         for i, item in enumerate(base.sensibilidad["precios"]):
-            for delta in _pasos_interiores(problema.restricciones[i][2], item["piso"], item["techo"]):
+            for delta in _pasos_interiores(
+                problema.restricciones[i][2], item["piso"], item["techo"]
+            ):
                 nuevo = resolver(_con_cambio(problema, i_b=i, delta_b=delta))
                 assert nuevo.estado == "optimo", (nombre, i, delta, nuevo.estado)
-                assert nuevo.z - base.z == item["precio"] * delta, (nombre, "b", i, delta)
+                assert nuevo.z - base.z == item["precio"] * delta, (
+                    nombre,
+                    "b",
+                    i,
+                    delta,
+                )
         for j, item in enumerate(base.sensibilidad["costos"]):
             for delta in _pasos_interiores(problema.c[j], item["piso"], item["techo"]):
                 nuevo = resolver(_con_cambio(problema, i_c=j, delta_c=delta))
                 assert nuevo.estado == "optimo", (nombre, item["variable"], delta)
-                assert nuevo.z == base.z + delta * base.valores[f"x{j + 1}"], (nombre, item["variable"], delta)
+                assert nuevo.z == base.z + delta * base.valores[f"x{j + 1}"], (
+                    nombre,
+                    item["variable"],
+                    delta,
+                )
                 for k in range(len(problema.c)):
-                    assert nuevo.valores[f"x{k + 1}"] == base.valores[f"x{k + 1}"], (nombre, item["variable"], delta)
+                    assert nuevo.valores[f"x{k + 1}"] == base.valores[f"x{k + 1}"], (
+                        nombre,
+                        item["variable"],
+                        delta,
+                    )
 
     multiple = resolver(cargar_preset("Problema 6"))
-    x1 = next(item for item in multiple.sensibilidad["costos"] if item["variable"] == "x1")
+    x1 = next(
+        item for item in multiple.sensibilidad["costos"] if item["variable"] == "x1"
+    )
     assert x1["costo"] == 0
     assert x1["techo"] == 2
 
     assert resolver(cargar_preset("Problema 4")).sensibilidad is None
     assert resolver(cargar_preset("Problema 5")).sensibilidad is None
-    print("\nSensibilidad: Wyndor da 0, 3/2 y 1. Los rangos coinciden al volver a resolver.")
+    print(
+        "\nSensibilidad: Wyndor da 0, 3/2 y 1. Los rangos coinciden al volver a resolver."
+    )
 
 
 if __name__ == "__main__":

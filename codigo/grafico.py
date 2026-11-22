@@ -37,18 +37,30 @@ def _lineas(restricciones):
     return lineas
 
 
-def _vertices(restricciones):
+def _cruces(restricciones):
+    """Cortes de las rectas entre sí y con los ejes, en el primer cuadrante."""
     lineas = _lineas(restricciones)
     vistos = []
     for i in range(len(lineas)):
         for j in range(i + 1, len(lineas)):
             punto = _cruce(lineas[i], lineas[j])
-            if punto is None or not _cumple(punto[0], punto[1], restricciones):
+            if punto is None or punto[0] < -TOL or punto[1] < -TOL:
                 continue
-            if any(abs(punto[0] - p[0]) < 1e-6 and abs(punto[1] - p[1]) < 1e-6 for p in vistos):
+            if any(
+                abs(punto[0] - p[0]) < 1e-6 and abs(punto[1] - p[1]) < 1e-6
+                for p in vistos
+            ):
                 continue
             vistos.append(punto)
     return vistos
+
+
+def _vertices(restricciones):
+    return [
+        punto
+        for punto in _cruces(restricciones)
+        if _cumple(punto[0], punto[1], restricciones)
+    ]
 
 
 def _choca_con_caja(restricciones, lado):
@@ -141,7 +153,9 @@ def analizar_region(restricciones):
     """Vértices factibles y si la región se sale de una caja grande."""
     if any(len(coefs) != 2 for coefs, _, _ in restricciones):
         raise ValueError("el gráfico pide dos variables")
-    como_float = [([float(c) for c in coefs], rel, float(b)) for coefs, rel, b in restricciones]
+    como_float = [
+        ([float(c) for c in coefs], rel, float(b)) for coefs, rel, b in restricciones
+    ]
     vertices = _vertices(como_float)
     mayor = 1.0
     for x, y in vertices:
@@ -180,11 +194,22 @@ def figura(problema, resultado):
     if len(problema.c) != 2:
         return None
     region = analizar_region(problema.restricciones)
+    como_float = [
+        ([float(coef) for coef in coefs], rel, float(b))
+        for coefs, rel, b in problema.restricciones
+    ]
+    referencia = max([1.0] + [max(abs(x), abs(y)) for x, y in region["vertices"]])
+    no_factibles = [
+        punto
+        for punto in _cruces(como_float)
+        if not _cumple(punto[0], punto[1], como_float)
+        and max(abs(punto[0]), abs(punto[1])) <= referencia * 3
+    ]
     c = [float(coef) for coef in problema.c]
     fig = go.Figure()
     extra = list(region["poligono"])
-    todos = region["vertices"] + extra
-    tope = max([1.0] + [max(abs(x), abs(y)) for x, y in todos]) * 1.25 + 1
+    todos = region["vertices"] + extra + no_factibles
+    tope = max([1.0] + [max(abs(x), abs(y)) for x, y in todos]) * 1.15 + 1
 
     def segmento_recta(a, b, rhs):
         puntos = []
@@ -200,7 +225,9 @@ def figura(problema, resultado):
                 puntos.append((x, y))
         limpios = []
         for p in puntos:
-            if not any(abs(p[0] - q[0]) < 1e-6 and abs(p[1] - q[1]) < 1e-6 for q in limpios):
+            if not any(
+                abs(p[0] - q[0]) < 1e-6 and abs(p[1] - q[1]) < 1e-6 for q in limpios
+            ):
                 limpios.append(p)
         return limpios[:2]
 
@@ -265,10 +292,22 @@ def figura(problema, resultado):
                 x=[p[0] for p, _ in otros],
                 y=[p[1] for p, _ in otros],
                 mode="markers+text",
-                name="Vértices",
+                name="Vértices factibles",
                 text=[f"({p[0]:.4g}, {p[1]:.4g})<br>Z={z:.4g}" for p, z in otros],
                 textposition="top center",
-                marker={"size": 9, "color": "#1f4e79"},
+                marker={"size": 9, "color": "#2f7d4a"},
+            )
+        )
+    if no_factibles:
+        fig.add_trace(
+            go.Scatter(
+                x=[p[0] for p in no_factibles],
+                y=[p[1] for p in no_factibles],
+                mode="markers+text",
+                name="Vértices no factibles",
+                text=[f"({p[0]:.4g}, {p[1]:.4g})<br>no factible" for p in no_factibles],
+                textposition="bottom center",
+                marker={"size": 8, "color": "#9b3d6e"},
             )
         )
     if optimos:
@@ -278,7 +317,9 @@ def figura(problema, resultado):
                 y=[p[1] for p, _ in optimos],
                 mode="markers+text",
                 name="Óptimo",
-                text=[f"óptimo ({p[0]:.4g}, {p[1]:.4g})<br>Z={z:.4g}" for p, z in optimos],
+                text=[
+                    f"óptimo ({p[0]:.4g}, {p[1]:.4g})<br>Z={z:.4g}" for p, z in optimos
+                ],
                 textposition="bottom center",
                 marker={"size": 14, "color": "#b45309", "symbol": "star"},
             )
