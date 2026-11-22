@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Boceto Sprint 1</title>
+<style>
+  @page { size: 13.333in 7.5in; margin: 0.35in; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Source Sans 3", "Liberation Sans", "Noto Sans", sans-serif;
+    color: #31333f;
+    background: #fff;
+  }
+  .sheet {
+    width: 12.55in;
+    height: 6.75in;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+  }
+  .sheet:last-child { page-break-after: auto; }
+  .cap { margin: 0 0 8px; font-size: 14px; color: #31333f; }
+  .app {
+    flex: 1;
+    display: flex;
+    border: 1px solid #d6d6d6;
+    min-height: 0;
+    background: #fff;
+  }
+  aside {
+    width: 230px;
+    background: #f0f2f6;
+    padding: 18px 16px;
+    border-right: 1px solid #e6e6e6;
+    flex-shrink: 0;
+  }
+  aside h2 { margin: 0 0 14px; font-size: 16px; font-weight: 600; }
+  .radio { display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+  .radio div { display: flex; gap: 8px; align-items: center; }
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid #bfbfbf; background: #fff; flex-shrink: 0;
+  }
+  .dot.on { border-color: #ff4b4b; box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 8px #ff4b4b; }
+  main { flex: 1; padding: 16px 28px 12px; min-width: 0; }
+  h1 { margin: 0 0 12px; font-size: 28px; font-weight: 600; }
+  .lbl { font-size: 14px; margin: 0 0 4px; }
+  .row { display: flex; gap: 28px; align-items: flex-end; margin-bottom: 14px; }
+  input, .box {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 15px;
+    min-width: 64px;
+  }
+  .wide { min-width: 220px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin-top: 4px; }
+  th { background: #f0f2f6; font-weight: 600; text-align: left; }
+  th, td { border: 1px solid #e0e0e0; padding: 6px 10px; }
+  .btns { display: flex; gap: 8px; margin-top: 16px; }
+  button {
+    font: inherit;
+    font-size: 15px;
+    border-radius: 8px;
+    padding: 6px 16px;
+    cursor: default;
+  }
+  .sec { background: #fff; color: #31333f; border: 1px solid rgba(49,51,63,.2); }
+  .pri { background: #ff4b4b; color: #fff; border: 1px solid #ff4b4b; }
+  .metrics { display: flex; gap: 36px; margin: 8px 0 16px; }
+  .metrics b { display: block; font-size: 28px; font-weight: 600; }
+  .metrics span { font-size: 14px; color: #808495; }
+  .ok {
+    background: #e8f8ee;
+    border-left: 4px solid #21c354;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    font-size: 15px;
+  }
+  .note { margin-top: 12px; font-size: 14px; color: #555; }
+  svg text { font-family: "Liberation Sans", sans-serif; }
+</style>
+</head>
+<body>
+
+<section class="sheet">
+  <p class="cap">Pantalla 1. Entrada</p>
+  <div class="app">
+    <aside>
+      <h2>Aplicación PL</h2>
+      <div class="radio">
+        <div><i class="dot on"></i> Entrada</div>
+        <div><i class="dot"></i> Resultados</div>
+        <div><i class="dot"></i> Paso a paso</div>
+        <div><i class="dot"></i> Gráfico</div>
+      </div>
+    </aside>
+    <main>
+      <h1>Problema</h1>
+      <div class="row">
+        <div>
+          <p class="lbl">Objetivo</p>
+          <div class="radio" style="flex-direction:row; gap:16px">
+            <div><i class="dot on"></i> Maximizar</div>
+            <div><i class="dot"></i> Minimizar</div>
+          </div>
+        </div>
+        <div><p class="lbl">n variables</p><div class="box">2</div></div>
+        <div><p class="lbl">m restricciones</p><div class="box">3</div></div>
+      </div>
+      <p class="lbl">Coeficientes de Z (c1, c2)</p>
+      <div class="row">
+        <div class="box">3</div>
+        <div class="box">5</div>
+      </div>
+      <p class="lbl">Restricciones</p>
+      <table>
+        <tr><th>a1</th><th>a2</th><th>tipo</th><th>b</th></tr>
+        <tr><td>1</td><td>0</td><td>≤</td><td>4</td></tr>
+        <tr><td>0</td><td>2</td><td>≤</td><td>12</td></tr>
+        <tr><td>3</td><td>2</td><td>≤</td><td>18</td></tr>
+      </table>
+      <div class="btns">
+        <button class="sec">Validar</button>
+        <button class="pri">Calcular</button>
+        <button class="sec">Paso a paso</button>
+      </div>
+    </main>
+  </div>
+</section>
+
+<section class="sheet">
+  <p class="cap">Pantalla 2. Resultados</p>
+  <div class="app">
+    <aside>
+      <h2>Aplicación PL</h2>
+      <div class="radio">
+        <div><i class="dot"></i> Entrada</div>
+        <div><i class="dot on"></i> Resultados</div>
+        <div><i class="dot"></i> Paso a paso</div>
+        <div><i class="dot"></i> Gráfico</div>
+      </div>
+    </aside>
+    <main>
+      <h1>Solución</h1>
+      <div class="ok">Solución óptima.</div>
+      <div class="metrics">
+        <div><span>x1</span><b>2</b></div>
+        <div><span>x2</span><b>6</b></div>
+        <div><span>Z</span><b>36</b></div>
+      </div>
+      <p class="lbl">Holguras</p>
+      <table>
+        <tr><th>restricción</th><th>holgura</th></tr>
+        <tr><td>1</td><td>2</td></tr>
+        <tr><td>2</td><td>0</td></tr>
+        <tr><td>3</td><td>0</td></tr>
+      </table>
+      <p class="note">Si no hay solución (infactible, no acotado, etc.) se muestra el mensaje y no esta tabla.</p>
+    </main>
+  </div>
+</section>
+
+<section class="sheet">
+  <p class="cap">Pantalla 3. Paso a paso</p>
+  <div class="app">
+    <aside>
+      <h2>Aplicación PL</h2>
+      <div class="radio">
+        <div><i class="dot"></i> Entrada</div>
+        <div><i class="dot"></i> Resultados</div>
+        <div><i class="dot on"></i> Paso a paso</div>
+        <div><i class="dot"></i> Gráfico</div>
+      </div>
+    </aside>
+    <main>
+      <h1>Iteración 1</h1>
+      <div class="row">
+        <div><p class="lbl">Entra</p><div class="box">x2</div></div>
+        <div><p class="lbl">Sale</p><div class="box">s2</div></div>
+        <div><p class="lbl">Pivote</p><div class="box">2</div></div>
+        <div><p class="lbl">Z</p><div class="box">30</div></div>
+      </div>
+      <table>
+        <tr><th>básica</th><th>x1</th><th>x2</th><th>s1</th><th>s2</th><th>s3</th><th>b</th></tr>
+        <tr><td>s1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>4</td></tr>
+        <tr><td>x2</td><td>0</td><td>1</td><td>0</td><td>0.5</td><td>0</td><td>6</td></tr>
+        <tr><td>s3</td><td>3</td><td>0</td><td>0</td><td>-1</td><td>1</td><td>6</td></tr>
+        <tr><td>Z</td><td>-3</td><td>0</td><td>0</td><td>2.5</td><td>0</td><td>30</td></tr>
+      </table>
+      <div class="btns">
+        <button class="sec">Anterior</button>
+        <button class="pri">Siguiente</button>
+      </div>
+    </main>
+  </div>
+</section>
+
+<section class="sheet">
+  <p class="cap">Pantalla 4. Gráfico (solo si hay 2 variables)</p>
+  <div class="app">
+    <aside>
+      <h2>Aplicación PL</h2>
+      <div class="radio">
+        <div><i class="dot"></i> Entrada</div>
+        <div><i class="dot"></i> Resultados</div>
+        <div><i class="dot"></i> Paso a paso</div>
+        <div><i class="dot on"></i> Gráfico</div>
+      </div>
+    </aside>
+    <main>
+      <h1>Gráfico</h1>
+      <svg viewBox="0 0 560 300" width="560" height="300">
+        <line x1="50" y1="20" x2="50" y2="250" stroke="#333" stroke-width="1"/>
+        <line x1="50" y1="250" x2="520" y2="250" stroke="#333" stroke-width="1"/>
+        <polygon points="50,250 210,250 210,160 130,70 50,70" fill="#1f77b4" fill-opacity="0.25" stroke="#1f77b4"/>
+        <circle cx="130" cy="70" r="4" fill="#d62728"/>
+        <text x="140" y="66" font-size="13" fill="#333">(2, 6) Z = 36</text>
+        <text x="500" y="268" font-size="13" fill="#333">x1</text>
+        <text x="28" y="24" font-size="13" fill="#333">x2</text>
+      </svg>
+      <p class="note">Con 3 o más variables esta pantalla no se muestra.</p>
+    </main>
+  </div>
+</section>
+
+</body>
+</html>
